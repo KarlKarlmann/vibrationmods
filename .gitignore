@@ -1,6 +1,7 @@
 .gradle/
 build/
 run/
+libs/
 out/
 bin/
 *.class
