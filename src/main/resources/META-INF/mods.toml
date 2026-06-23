@@ -1,0 +1,38 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="CC BY-NC 4.0"
+
+[[mods]]
+modId="${mod_id}"
+version="${mod_version}"
+displayName="Vibrating Guns by Karl Karlmann"
+displayURL="https://www.n3g.de"
+logoFile="vibration.png"
+authors="Karl Karlmann"
+description='''
+Adds vibration system and Warden interactions for TACZ (Timeless and Classics Zero) weapons.
+'''
+
+# Forge Dependency
+[[dependencies.${mod_id}]]
+    modId="forge"
+    mandatory=true
+    versionRange="[47,)"
+    ordering="NONE"
+    side="BOTH"
+
+# Minecraft Dependency
+[[dependencies.${mod_id}]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.20.1,1.21)"
+    ordering="NONE"
+    side="BOTH"
+
+# TACZ Dependency
+[[dependencies.${mod_id}]]
+    modId="tacz"
+    mandatory=true
+    versionRange="[1.0,)"
+    ordering="AFTER"
+    side="BOTH"
