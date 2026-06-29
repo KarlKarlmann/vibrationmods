@@ -1,0 +1,5 @@
+dependencies {
+    // Lokale deobfuskierte Mods aus dem zentralen /libs Ordner laden
+    implementation fg.deobf(fileTree(dir: rootProject.file('libs'), include: '*ParCool*.jar'))
+    implementation fg.deobf(fileTree(dir: rootProject.file('libs'), include: '*stealth*.jar'))
+}

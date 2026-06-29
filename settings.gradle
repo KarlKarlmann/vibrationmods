@@ -12,4 +12,5 @@ rootProject.name = 'vibrationmods'
 // Jeder Name entspricht einem Ordner im Hauptverzeichnis.
 include 'vibratingguns'
 include 'taczstealthbridge'
-// include 'parcoolbridge' // Einkommentieren, sobald der Ordner existiert
+include 'vibratingsteps'
+include 'parcoolstealthbridge'

@@ -1,0 +1,42 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="CC BY-NC 4.0"
+
+[[mods]]
+modId="parcoolstealthbridge"
+version="${version}"
+displayName="Stealth & ParCool Compatibility Bridge by Karl Karlmann"
+displayURL="https://www.n3g.de"
+logoFile="bridge_logo.png"
+authors="Karl Karlmann"
+description='''
+Der ultimative Zero-Overhead Bridge-Mod. Erzwingt die absolute Harmonie zwischen ParCool!, Stealth Mod und Vibrating Steps. Performance-Einfluss: 0.00%. Reines Genie.
+'''
+
+# -------------------------------------------------------------------------
+# ABHÄNGIGKEITEN (DEPENDENCIES)
+# -------------------------------------------------------------------------
+
+# 1. Die Haupt-StealthMod (Erfordert mindestens die Version mit dem neuen dynamischen Exporter)
+[[dependencies.parcoolstealthbridge]]
+modId="stealth"
+mandatory=true
+versionRange="[stealth_1.20.1_forge_1.0.9.1000o,)"
+ordering="NONE"
+side="BOTH"
+
+# 2. ParCool (Erfordert mindestens Version 3.4.0, da hier HideInBlock hinzugefügt wurde)
+[[dependencies.parcoolstealthbridge]]
+modId="parcool"
+mandatory=true
+versionRange="[3.4.0,)"
+ordering="NONE"
+side="BOTH"
+
+# 3. Der Vibrations-Fix (Sorgt für die akustische Koppelung)
+[[dependencies.parcoolstealthbridge]]
+modId="vibratingsteps"
+mandatory=true
+versionRange="[1.0.0,)"
+ordering="NONE"
+side="BOTH"

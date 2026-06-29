@@ -15,7 +15,7 @@ subprojects {
     apply plugin: 'org.spongepowered.mixin'
     apply plugin: 'eclipse'
 
-    group = project.hasProperty('mod_group') ? project.getProperty('mod_group') : 'net.vibratingguns'
+    group = project.hasProperty("group_${project.name}") ? project.getProperty("group_${project.name}") : 'net.vibratingguns'
     version = project.hasProperty("version_${project.name}") ? project.getProperty("version_${project.name}") : '1.0.0'
 
     java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -100,6 +100,17 @@ subprojects {
         }
         finalizedBy('reobfJar')
     }
+}
+
+// ============================================================
+// ZENTRALER MASTER-BUILD TASK
+// ============================================================
+// Dieser Task bündelt alle Unterprojekte. Wenn du "gradlew build" im 
+// Hauptverzeichnis ausführst, werden alle Mods gleichzeitig gebaut.
+tasks.register('build') {
+    group = 'build'
+    description = 'Baut alle Unter-Mods in diesem Workspace gleichzeitig.'
+    dependsOn subprojects.collect { it.tasks.named('build') }
 }
 
 // Lade das lokale Launcher-Skript (wird von Git ignoriert)
