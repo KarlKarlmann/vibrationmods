@@ -1,0 +1,7 @@
+archivesBaseName = 'vibratingguns'
+
+dependencies {
+    // Da Vibrating Guns ein TACZ-Addon ist, braucht es die Bibliothek ebenfalls!
+    // Die Jar wird bequem aus dem Root-Ordner (libs/) geladen.
+    implementation fg.deobf(fileTree(dir: rootProject.file('libs'), include: '*tacz*.jar'))
+}

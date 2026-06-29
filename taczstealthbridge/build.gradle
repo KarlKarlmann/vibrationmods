@@ -1,0 +1,5 @@
+archivesBaseName = 'taczstealthbridge'
+
+dependencies {
+    compileOnly project(':vibratingguns')
+}

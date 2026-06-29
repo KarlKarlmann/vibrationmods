@@ -1,4 +1,4 @@
-package com.example.vibratingguns;
+package net.vibratingguns;
 
 import com.tacz.guns.api.entity.IGunOperator;
 import com.tacz.guns.api.event.common.GunFireEvent;

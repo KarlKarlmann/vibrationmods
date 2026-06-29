@@ -6,177 +6,108 @@ buildscript {
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '6.0.+'
-        // WICHTIG: Das Mixin-Gradle Plugin hinzufügen
         classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
     }
 }
 
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'org.spongepowered.mixin' // Mixin Plugin anwenden
-apply plugin: 'eclipse'
+subprojects {
+    apply plugin: 'net.minecraftforge.gradle'
+    apply plugin: 'org.spongepowered.mixin'
+    apply plugin: 'eclipse'
 
-// Version aus gradle.properties laden (mit Fallbacks)
-version = project.hasProperty('mod_version') ? project.getProperty('mod_version') : '1.0.0'
-group = project.hasProperty('mod_group') ? project.getProperty('mod_group') : 'net.vibratingguns'
-archivesBaseName = project.hasProperty('mod_id') ? project.getProperty('mod_id') : 'vibratingguns'
+    group = project.hasProperty('mod_group') ? project.getProperty('mod_group') : 'net.vibratingguns'
+    version = project.hasProperty("version_${project.name}") ? project.getProperty("version_${project.name}") : '1.0.0'
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+    java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
-minecraft {
-    mappings channel: project.hasProperty('mappings_channel') ? project.getProperty('mappings_channel') : 'official', version: project.hasProperty('mappings_version') ? project.getProperty('mappings_version') : '1.20.1'
-    copyIdeResources = true
-    
-    // AT für Zugriff auf geschützte Felder/Methoden (falls für TACZ benötigt)
-    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+    minecraft {
+        mappings channel: project.hasProperty('mappings_channel') ? project.getProperty('mappings_channel') : 'official', 
+                 version: project.hasProperty('mappings_version') ? project.getProperty('mappings_version') : '1.20.1'
+        
+        copyIdeResources = true
 
-    runs {
-        client {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-            property 'mixin.env.disableRefMap', 'true'
-            // Dynamische Referenz zur korrekten Mixin-Config
-            arg "-mixin.config=${archivesBaseName}.mixins.json"
-            mods { "${archivesBaseName}" { source sourceSets.main } }
+        def atFile = file('src/main/resources/META-INF/accesstransformer.cfg')
+        if (atFile.exists()) {
+            accessTransformer = atFile
         }
-        server {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-            property 'mixin.env.disableRefMap', 'true'
-            arg "-mixin.config=${archivesBaseName}.mixins.json"
-            mods { "${archivesBaseName}" { source sourceSets.main } }
+
+        runs {
+            client {
+                workingDirectory rootProject.file('run')
+                property 'forge.logging.markers', 'REGISTRIES'
+                property 'forge.logging.console.level', 'debug'
+                property 'mixin.env.disableRefMap', 'true'
+                arg "-mixin.config=${project.name}.mixins.json"
+                mods { "${project.name}" { source sourceSets.main } }
+            }
+            server {
+                workingDirectory rootProject.file('run')
+                property 'forge.logging.markers', 'REGISTRIES'
+                property 'forge.logging.console.level', 'debug'
+                property 'mixin.env.disableRefMap', 'true'
+                arg "-mixin.config=${project.name}.mixins.json"
+                mods { "${project.name}" { source sourceSets.main } }
+            }
         }
     }
-}
 
-mixin {
-    add sourceSets.main, "${archivesBaseName}.refmap.json"
-    config "${archivesBaseName}.mixins.json"
-}
+    mixin {
+        add sourceSets.main, "${project.name}.refmap.json"
+        config "${project.name}.mixins.json"
+    }
 
-repositories {
-    flatDir { dirs 'libs' }
-    // Nützlich, falls TACZ oder andere Mods über CurseMaven geladen werden statt lokal aus /libs
-    maven { url = "https://cursemaven.com" } 
-}
+    repositories {
+        flatDir { dirs rootProject.file('libs') }
+        maven { url = "https://cursemaven.com" } 
+    }
 
-dependencies {
-    minecraft "net.minecraftforge:forge:${project.hasProperty('mc_version') ? project.getProperty('mc_version') : '1.20.1'}-${project.hasProperty('forge_version') ? project.getProperty('forge_version') : '47.3.0'}"
-    
-    // WICHTIG: Annotation Processor für Mixins
-    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    dependencies {
+        minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
+        annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    }
 
-    // Scannt den "libs" Ordner automatisch nach ALLEN .jar Dateien und bindet sie ein!
-    // Dadurch wird tacz-1.20.1-1.1.8-hotfix.jar automatisch als Dependency geladen.
-    implementation fg.deobf(fileTree(dir: 'libs', include: '*.jar'))
-}
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+    }
 
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
-}
+    processResources {
+        def replaceProperties = [
+            version: project.version,
+            mod_version: project.version,
+            mod_id: project.name
+        ]
+        inputs.properties replaceProperties
+        replaceProperties.put 'project', project
 
-// --- WICHTIG 1: Variablen in der mods.toml ersetzen ---
-def replaceProperties = [
-        version: project.version,
-        mod_version: project.version,
-        mod_id: archivesBaseName
-]
+        filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+            expand replaceProperties
+        }
+    }
 
-processResources {
-    inputs.properties replaceProperties
-    replaceProperties.put 'project', project
-
-    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
-        expand replaceProperties
+    jar {
+        archiveFileName = "${project.name}_${mc_version}_forge_${project.version}.jar"
+        manifest {
+            attributes([
+                "Specification-Title"     : project.name,
+                "Specification-Vendor"    : mod_authors,
+                "Specification-Version"   : "1",
+                "Implementation-Title"    : project.name,
+                "Implementation-Version"  : project.version,
+                "Implementation-Vendor"   : mod_authors,
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                "MixinConfigs"            : "${project.name}.mixins.json"
+            ])
+        }
+        finalizedBy('reobfJar')
     }
 }
 
-// --- WICHTIG 2: Mod Manifest mit sauberen FML-Daten ---
-tasks.named('jar', Jar).configure {
-    archiveFileName = "${archivesBaseName}_1.20.1_forge_${project.version}.jar"
-
-    manifest {
-        attributes([
-            "Specification-Title"     : project.hasProperty('mod_name') ? project.getProperty('mod_name') : "Vibrating Guns",
-            "Specification-Vendor"    : project.hasProperty('mod_authors') ? project.getProperty('mod_authors') : "KarlKarlmann",
-            "Specification-Version"   : "1",
-            "Implementation-Title"    : project.name,
-            "Implementation-Version"  : project.version,
-            "Implementation-Vendor"   : project.hasProperty('mod_authors') ? project.getProperty('mod_authors') : "KarlKarlmann",
-            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-            // WICHTIG: Mixins in die kompilierte JAR einbinden
-            "MixinConfigs"            : "${archivesBaseName}.mixins.json"
-        ])
-    }
+// Lade das lokale Launcher-Skript (wird von Git ignoriert)
+if (file('local-launcher.gradle').exists()) {
+    apply from: 'local-launcher.gradle'
 }
 
-// --- WICHTIG 3: Reobfuscation für das fertige Spiel aktivieren! ---
-jar.finalizedBy('reobfJar')
-
-if (file('local-git').exists()) {
+// Lade das lokale Git-Skript (wird von Git ignoriert)
+if (file('local-git.gradle').exists()) {
     apply from: 'local-git.gradle'
-}
-
-// ============================================================
-// CUSTOM LAUNCHER & SERVER SYNC TASKS
-// ============================================================
-
-// --- ANPASSEN: an deine Umgebung ---
-def instanceModsDir  = 'E:/PrismLauncher/instances/StonesTest/minecraft/mods'
-def prismLauncherExe = 'E:/PrismLauncher/prismlauncher.exe'
-def instanceId       = 'StonesTest'   // Ordnername der Instanz
-
-def serverDir         = 'E:/StonesTestServer'
-def serverModsDir     = "${serverDir}/mods"
-
-// Eine Liste der Dateien, die jeweils synct werden sollen:
-// 1) die frisch gebaute & reobfuskierte Vibrating Guns-Jar
-// 2) ALLES, was in libs/ liegt (TACZ etc.)
-def filesToSync = {
-    [tasks.named('jar').get().archiveFile.get().asFile] +
-    fileTree(dir: 'libs', include: '*.jar').files
-}
-
-// ---------------- CLIENT ----------------
-tasks.register('syncModsToInstance', Copy) {
-    dependsOn tasks.named('reobfJar')
-
-    doFirst {
-        // alte Jars im Ziel-mods-Ordner entfernen,
-        // damit keine veralteten Doppel-Versionen rumliegen
-        def names = filesToSync().collect { it.name }
-        fileTree(instanceModsDir).matching {
-            include names
-        }.each { it.delete() }
-    }
-
-    from(filesToSync())
-    into instanceModsDir
-}
-
-tasks.register('runVanilla', Exec) {
-    dependsOn 'syncModsToInstance'
-    commandLine prismLauncherExe, '-l', instanceId
-}
-
-// ---------------- SERVER ----------------
-tasks.register('syncModsToServer', Copy) {
-    dependsOn tasks.named('reobfJar')
-
-    doFirst {
-        def names = filesToSync().collect { it.name }
-        fileTree(serverModsDir).matching {
-            include names
-        }.each { it.delete() }
-    }
-
-    from(filesToSync())
-    into serverModsDir
-}
-
-tasks.register('runServerVanilla', Exec) {
-    dependsOn 'syncModsToServer'
-    workingDir serverDir
-    commandLine 'cmd', '/c', 'run.bat'
 }

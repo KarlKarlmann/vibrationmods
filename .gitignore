@@ -8,4 +8,6 @@ bin/
 .idea/
 *.iml
 .vscode/
+work/
 local-git.gradle
+local-launcher.gradle

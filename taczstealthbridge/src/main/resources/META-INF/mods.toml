@@ -1,0 +1,38 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="CC BY-NC 4.0"
+
+[[mods]]
+
+modId="taczstealthbridge"
+version="${version}"
+displayName="Stealth & TACZ Compatibility Bridge by Karl Karlmann"
+displayURL="https://www.n3g.de"
+logoFile="bridge_logo.png"
+authors="Karl Karlmann"
+description='''
+The ultimate zero-overhead bridge mod. Forces harmony between Timeless and Classics Zero, Stealth Mod, and Vibrating Guns. Code count: 0 lines. Performance impact: 0.00%. Pure genius.
+'''
+
+[[dependencies.taczstealthbridge]]
+modId="stealth"
+mandatory=true
+versionRange="[1.0.0,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.taczstealthbridge]]
+
+modId="tacz"
+mandatory=true
+versionRange="[1.0,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.taczstealthbridge]]
+
+modId="vibratingguns"
+mandatory=true
+versionRange="[1.0.0,)"
+ordering="NONE"
+side="BOTH"

@@ -1,9 +1,15 @@
 pluginManagement {
     repositories {
-        maven { url  = 'https://maven.minecraftforge.net/' }
-        maven { url  = 'https://repo.spongepowered.org/repository/maven-public/' }
+        maven { url = 'https://maven.minecraftforge.net/' }
+        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
         mavenCentral()
     }
 }
 
-rootProject.name = 'vibratingguns'
+rootProject.name = 'vibrationmods'
+
+// Hier fügen wir alle Unter-Mods hinzu. 
+// Jeder Name entspricht einem Ordner im Hauptverzeichnis.
+include 'vibratingguns'
+include 'taczstealthbridge'
+// include 'parcoolbridge' // Einkommentieren, sobald der Ordner existiert
