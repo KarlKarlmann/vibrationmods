@@ -1,0 +1,5 @@
+archivesBaseName = 'targetoutlines'
+
+dependencies {
+compileOnly fg.deobf(fileTree(dir: rootProject.file('libs'), include: '*stealth*.jar'))
+}

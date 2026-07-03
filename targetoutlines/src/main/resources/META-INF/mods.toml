@@ -1,0 +1,35 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="CC BY-NC 4.0"
+
+[[mods]]
+modId="targetoutlines"
+version="${version}"
+displayName="Target Outlines"
+displayURL="https://www.n3g.de"
+logoFile="targetoutlines.png"
+authors="Karl Karlmann"
+description='''
+Zeichnet dicke, rote, taktische Umrisse (Outlines) um alle Gegner, die dich aktiv anvisieren. Vollständig kompatibel und reaktiv mit der Stealth-Mod dank Event-Priorisierung.
+'''
+
+[[dependencies.targetoutlines]]
+modId="forge"
+mandatory=true
+versionRange="[47,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.targetoutlines]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1,1.21)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.targetoutlines]]
+modId="stealth"
+mandatory=false
+versionRange="[1.0.0,)"
+ordering="AFTER"
+side="BOTH"

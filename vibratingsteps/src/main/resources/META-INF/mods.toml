@@ -1,0 +1,38 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="CC BY-NC 4.0"
+
+[[mods]]
+modId="${mod_id}"
+version="${mod_version}"
+displayName="Vibrating Steps by Karl Karlmann"
+displayURL="https://www.n3g.de"
+logoFile="vibration.png"
+authors="Karl Karlmann"
+description='''
+Translates ParCool! movement actions into Minecraft server-side vibration Game Events. Alerts Wardens, triggers sculk sensors, and perfectly integrates with the Stealth Mod.
+'''
+
+# Forge Dependency
+[[dependencies.${mod_id}]]
+    modId="forge"
+    mandatory=true
+    versionRange="[47,)"
+    ordering="NONE"
+    side="BOTH"
+
+# Minecraft Dependency
+[[dependencies.${mod_id}]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.20.1,1.21)"
+    ordering="NONE"
+    side="BOTH"
+
+# ParCool Dependency
+[[dependencies.${mod_id}]]
+    modId="parcool"
+    mandatory=true
+    versionRange="[3.4.0,)"
+    ordering="AFTER"
+    side="BOTH"
