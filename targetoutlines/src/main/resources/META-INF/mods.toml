@@ -10,7 +10,7 @@ displayURL="https://www.n3g.de"
 logoFile="targetoutlines.png"
 authors="Karl Karlmann"
 description='''
-Zeichnet dicke, rote, taktische Umrisse (Outlines) um alle Gegner, die dich aktiv anvisieren. Vollständig kompatibel und reaktiv mit der Stealth-Mod dank Event-Priorisierung.
+Draws thick, red tactical outlines around all enemies who are actively targeting you.(only FOR you -noone else) Fully compatible and responsive with the Stealth Mod thanks to event prioritization.
 '''
 
 [[dependencies.targetoutlines]]

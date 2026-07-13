@@ -1,0 +1,19 @@
+{
+"tooltip.assassinscreedstealthbridge.weapon_t3": "Master Assassin's Weapon",
+"tooltip.assassinscreedstealthbridge.weapon_t3.backstab": " + Supreme Backstab Damage",
+"tooltip.assassinscreedstealthbridge.weapon_t3.air_assassination": " + Enables Air Assassinations",
+"tooltip.assassinscreedstealthbridge.weapon_t2": "Assassin's Weapon",
+"tooltip.assassinscreedstealthbridge.weapon_t2.backstab": " + Heavy Backstab Damage",
+"tooltip.assassinscreedstealthbridge.weapon_t1": "Initiate's Weapon",
+"tooltip.assassinscreedstealthbridge.weapon_t1.backstab": " + Light Backstab Damage",
+
+"tooltip.assassinscreedstealthbridge.armor_t3": "Master Assassin's Gear",
+"tooltip.assassinscreedstealthbridge.armor_t3.camo": " + Supreme Camouflage",
+"tooltip.assassinscreedstealthbridge.armor_t3.muffle": " + Ghostly Footsteps",
+"tooltip.assassinscreedstealthbridge.armor_t2": "Assassin's Gear",
+"tooltip.assassinscreedstealthbridge.armor_t2.camo": " + Enhances Camouflage",
+"tooltip.assassinscreedstealthbridge.armor_t2.muffle": " + Muffles Footsteps",
+"tooltip.assassinscreedstealthbridge.armor_t1": "Initiate's Gear",
+"tooltip.assassinscreedstealthbridge.armor_t1.camo": " + Slight Camouflage",
+"tooltip.assassinscreedstealthbridge.armor_t1.muffle": " + Dampens Footsteps"
+}

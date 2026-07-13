@@ -1,0 +1,33 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="CC BY-NC 4.0"
+
+[[mods]]
+modId="assassinscreedstealthbridge"
+version="${version}"
+displayName="Stealth & Assassins Creed: Echoes Through Time Compatibility Bridge by Karl Karlmann"
+displayURL="https://www.n3g.de"
+logoFile="bridge_logo.png"
+authors="Karl Karlmann"
+description="Adds immersive stealth mechanics, lethal air assassinations, and dynamic armor camouflage to Assassins Legacy."
+
+[[dependencies.assassinscreedstealthbridge]]
+modId="forge"
+mandatory=true
+versionRange="[47.2.0,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.assassinscreedstealthbridge]]
+modId="stealth"
+mandatory=true
+versionRange="[1.0.0,)"
+ordering="AFTER"
+side="BOTH"
+
+[[dependencies.assassinscreedstealthbridge]]
+modId="assassins_creed"
+mandatory=true
+versionRange="[1.0.0,)"
+ordering="AFTER"
+side="BOTH"

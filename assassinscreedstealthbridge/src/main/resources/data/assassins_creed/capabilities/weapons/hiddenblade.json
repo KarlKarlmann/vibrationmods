@@ -1,0 +1,17 @@
+{
+  "collider": {
+    "number": 3,
+    "size": [
+      0.1,
+      0.2,
+      0.1
+    ],
+    "center": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "attributes": {},
+  "type": "epicfight:fist"
+}
