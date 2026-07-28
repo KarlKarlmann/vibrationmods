@@ -1,0 +1,26 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="CC BY-NC 4.0"
+
+[[mods]]
+modId="manhunt"
+version="${version}"
+displayName="Stealth: Manhunt by Karl Karlmann"
+displayURL="https://www.n3g.de"
+logoFile="manhunt_logo.png"
+authors="Karl Karlmann"
+description="Welcome to Splinter Call. The ultimate Hardcore Hide & Seek experience where the server hides the entities, and your eyes are useless. This is NOT Prop Hunt. You turn into a nightmare."
+
+[[dependencies.manhunt]]
+modId="forge"
+mandatory=true
+versionRange="[47.2.0,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.manhunt]]
+modId="stealth"
+mandatory=true
+versionRange="[1.0.103,)"
+ordering="AFTER"
+side="BOTH"
