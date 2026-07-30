@@ -86,8 +86,7 @@ public class ServerVibrationHandler {
                 // B. DIRECT SUBJECT GLOW: Wenn das Event direkt an den Koordinaten der Entity stattfindet
                 // Wir verzichten komplett auf statische Event-Listen. Ist die Entity nah genug am Geschehen, leuchtet sie auf!
                 if (responsible != null && distanceToSourceSq <= 2.25) {
-                    StealthManhunt.LOGGER.info("Direktes Echo von " + responsible.getName().getString() + " (Event: " + event.getVanillaEvent().getName() + ")");
-                    
+                   
                     ServerVisibilityManager.addEcho(player, responsible, 20);
 
                     // Sende das Glow-Paket

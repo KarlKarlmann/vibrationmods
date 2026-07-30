@@ -99,17 +99,14 @@ public class ClientEchoRenderer {
         ACTIVE_ECHOS.entrySet().removeIf(entry -> now > entry.getValue().expiresAt);
     }
 
-    /**
-     * THANOS SNAP PARTIKEL (Leuchtende Sculk-Seelen beim Verschwinden)
-     */
     @SubscribeEvent
     public static void onEntityVanish(EntityLeaveLevelEvent event) {
         if (!event.getLevel().isClientSide()) return;
         if (!(event.getEntity() instanceof LivingEntity living) || event.getEntity() == Minecraft.getInstance().player) return;
         if (living.getHealth() <= 0) return; 
 
-        if (!isEcho(living.getId())) return;
-
+        //if (!isEcho(living.getId())) return;
+		if (Minecraft.getInstance().player.distanceToSqr(living) > 32.0 * 32.0) return;
         AABB bounds = living.getBoundingBox();
         RandomSource rand = living.getRandom();
 
