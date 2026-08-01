@@ -3,6 +3,9 @@ package net.stealth.manhunt.logic;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import net.stealth.manhunt.config.ManhuntConfig;
 import net.stealth.util.StealthMath;
 
@@ -12,40 +15,33 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ServerVisibilityManager {
 
-    // Speichert: UUID des Spielers -> (ID der Entity -> Tick, an dem sie wieder verschwindet)
     private static final Map<UUID, Map<Integer, Long>> ECHO_TIMERS = new ConcurrentHashMap<>();
 
-    /**
-     * Wird aufgerufen, wenn eine Entity Lärm macht (Vibration).
-     * Zwingt den Server, diese Entity für den angegebenen Spieler kurzzeitig zu rendern.
-     */
     public static void addEcho(ServerPlayer observer, Entity target, int durationTicks) {
         ECHO_TIMERS.computeIfAbsent(observer.getUUID(), k -> new ConcurrentHashMap<>())
                    .put(target.getId(), observer.level().getGameTime() + durationTicks);
     }
 
     /**
-     * Der absolute Kern der Manhunt-Mod. 
-     * Hier entscheidet der SERVER, ob der Client überhaupt erfährt, dass diese Entität existiert.
+     * Entfernt die Echo-Timer eines Spielers beim Logout.
      */
+    public static void clearPlayer(UUID playerUuid) {
+        ECHO_TIMERS.remove(playerUuid);
+    }
+
     public static boolean isVisible(ServerPlayer observer, Entity target) {
-        // 1. Nur lebende Dinge können sich im Schatten verstecken (Items, Blöcke, etc. bleiben normal)
         if (!(target instanceof LivingEntity livingTarget)) {
             return true;
         }
         
-        // 2. VANILLA GLOWING (z.B. Spectral Arrow) bricht das Culling ab.
         if (livingTarget.isCurrentlyGlowing()) {
             return true;
         }
 
-        // 3. TEAM-CHECK (Config-gesteuert)
         if (ManhuntConfig.ALLIES_VISIBLE.get() && observer.isAlliedTo(livingTarget)) {
             return true;
         }
 
-        // 4. KAMPF-OVERRIDE (Das Anti-Desync Sicherheitsnetz)
-        // Wenn man sich haut, verschwindet man nicht im Schatten.
         if (livingTarget.hurtTime > 0) {
             return true;
         }
@@ -56,41 +52,76 @@ public class ServerVisibilityManager {
             return true;
         }
 
-        // 5. IST DIE ENTITY EIN AKTIVES ECHO (LÄRM)?
         Map<Integer, Long> playerEchos = ECHO_TIMERS.get(observer.getUUID());
         if (playerEchos != null) {
             Long expirationTick = playerEchos.get(target.getId());
             if (expirationTick != null) {
                 if (observer.level().getGameTime() < expirationTick) {
-                    return true; // LASS SIE DURCH! Der Server schickt sie an den Client für den roten Schatten!
+                    return true; 
                 } else {
-                    playerEchos.remove(target.getId()); // Cooldown abgelaufen, Zeit für den Thanos-Snap!
+                    playerEchos.remove(target.getId()); 
                 }
             }
         }
 
         // ==========================================
-        // DIE MANHUNT REGELN (Powered by Karl's StealthMath)
+        // 6. MANHUNT-SPEZIFISCHES RAYCASTING (Culling-Schutz)
         // ==========================================
-        
-        // 6. THE WALLHACK KILLER (Anti-ESP)
-        // (Wichtig: Wird nach dem Echo-Check aufgerufen! So kann man Echos sogar kurz durch Wände aufblitzen sehen, 
-        //  falls man echtes "Gehör" visualisieren will. Wenn du Echos nicht durch Wände sehen willst, 
-        //  muss das über den Echo-Check wandern!)
-        if (!StealthMath.hasLineOfSight(observer, livingTarget)) {
+        if (!hasManhuntLineOfSight(observer, livingTarget)) {
             return false;
         }
 
-        // 7. Der Gamma-Killer: Core-Logik aus dem Stealth-System
         double visibilityScore = StealthMath.getVisibilityScore(livingTarget, observer);
         double PARANOIA_THRESHOLD = ManhuntConfig.PARANOIA_THRESHOLD.get(); 
 
-        // 8. Der Culling-Schnitt
         if (visibilityScore <= PARANOIA_THRESHOLD) {
             return false; 
         }
 
-        // Standard: Im Licht und alles ist gut sichtbar
         return true;
+    }
+
+    /**
+     * Präzises Silhouetten-Raycasting exklusiv für das Manhunt-Culling.
+     * Prüft Kopf, Mitte, Füße sowie die linke und rechte Kante der Hitbox.
+     */
+    public static boolean hasManhuntLineOfSight(ServerPlayer observer, LivingEntity target) {
+        Vec3 start = observer.getEyePosition();
+        Vec3 endCenter = target.getBoundingBox().getCenter();
+
+        // 1. Berechne Silhouetten-Breite der Hitbox
+        double width = target.getBbWidth();
+
+        // 2. Ausrichtung relativ zur Blickrichtung des Beobachters (XZ-Ebene)
+        Vec3 viewDir = endCenter.subtract(start);
+        Vec3 flatDir = new Vec3(viewDir.x, 0, viewDir.z);
+
+        Vec3 rightVec;
+        if (flatDir.lengthSqr() < 1E-4) {
+            rightVec = new Vec3(1, 0, 0);
+        } else {
+            rightVec = new Vec3(-flatDir.z, 0, flatDir.x).normalize();
+        }
+
+        // 3. Offset für die Seitenkanten (45% der Breite)
+        Vec3 sideOffset = rightVec.scale(width * 0.45);
+
+        // 4. Die 5 Prüfpunkte (Vertikal + Horizontal)
+        Vec3[] targetPoints = new Vec3[]{
+            target.getEyePosition(),           // Kopf
+            endCenter,                         // Mitte
+            target.position(),                 // Füße
+            endCenter.add(sideOffset),         // Linke Kante
+            endCenter.subtract(sideOffset)     // Rechte Kante
+        };
+
+        // 5. Raycast mit Short-Circuit (bricht ab, sobald der 1. Strahl trifft)
+        for (Vec3 end : targetPoints) {
+            if (observer.level().clip(new ClipContext(start, end, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, observer)).getType() == HitResult.Type.MISS) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

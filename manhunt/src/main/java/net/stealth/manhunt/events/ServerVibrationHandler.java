@@ -9,6 +9,7 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.VanillaGameEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.stealth.manhunt.StealthManhunt;
@@ -19,7 +20,11 @@ import net.stealth.manhunt.network.ManhuntNetwork;
 
 @Mod.EventBusSubscriber(modid = "manhunt", bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ServerVibrationHandler {
-
+	
+	@SubscribeEvent
+    public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+        ServerVisibilityManager.clearPlayer(event.getEntity().getUUID());
+    }
     @SubscribeEvent
     public static void onVibration(VanillaGameEvent event) {
         if (event.getLevel().isClientSide()) return;
