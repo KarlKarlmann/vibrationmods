@@ -5,7 +5,8 @@
 "refmap": "manhunt.refmap.json",
 "compatibilityLevel": "JAVA_17",
 "mixins": [
-"TrackedEntityMixin"
+"TrackedEntityMixin",
+"MixinMobAmbientSound"
 ],
 "client": [
 "EntityMixin",

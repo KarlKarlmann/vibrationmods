@@ -85,43 +85,40 @@ public class ServerVisibilityManager {
      * Präzises Silhouetten-Raycasting exklusiv für das Manhunt-Culling.
      * Prüft Kopf, Mitte, Füße sowie die linke und rechte Kante der Hitbox.
      */
-    public static boolean hasManhuntLineOfSight(ServerPlayer observer, LivingEntity target) {
-        Vec3 start = observer.getEyePosition();
-        Vec3 endCenter = target.getBoundingBox().getCenter();
+	public static boolean hasManhuntLineOfSight(ServerPlayer observer, LivingEntity target) {
+		// 1. Core-Abfrage: Deckt Glowing, Reiter-Ausnahme, die 3 Basis-Punkte UND die Mount-Rekursion dafür ab!
+		if (StealthMath.hasLineOfSight(observer, target)) {
+			return true;
+		}
 
-        // 1. Berechne Silhouetten-Breite der Hitbox
-        double width = target.getBbWidth();
+		// 2. Core hat 'false' gesagt. Jetzt prüfen wir die zusätzlichen Manhunt-Silhouetten (Seitenkanten)
+		Vec3 start = observer.getEyePosition();
+		Vec3 endCenter = target.getBoundingBox().getCenter();
+		double width = target.getBbWidth();
 
-        // 2. Ausrichtung relativ zur Blickrichtung des Beobachters (XZ-Ebene)
-        Vec3 viewDir = endCenter.subtract(start);
-        Vec3 flatDir = new Vec3(viewDir.x, 0, viewDir.z);
+		Vec3 viewDir = endCenter.subtract(start);
+		Vec3 flatDir = new Vec3(viewDir.x, 0, viewDir.z);
+		Vec3 rightVec = (flatDir.lengthSqr() < 1E-4) ? new Vec3(1, 0, 0) : new Vec3(-flatDir.z, 0, flatDir.x).normalize();
+		Vec3 sideOffset = rightVec.scale(width * 0.45);
 
-        Vec3 rightVec;
-        if (flatDir.lengthSqr() < 1E-4) {
-            rightVec = new Vec3(1, 0, 0);
-        } else {
-            rightVec = new Vec3(-flatDir.z, 0, flatDir.x).normalize();
-        }
+		Vec3[] sidePoints = new Vec3[]{
+			endCenter.add(sideOffset),         // Linke Kante
+			endCenter.subtract(sideOffset)     // Rechte Kante
+		};
 
-        // 3. Offset für die Seitenkanten (45% der Breite)
-        Vec3 sideOffset = rightVec.scale(width * 0.45);
+		for (Vec3 end : sidePoints) {
+			if (observer.level().clip(new ClipContext(start, end, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, observer)).getType() == HitResult.Type.MISS) {
+				return true;
+			}
+		}
 
-        // 4. Die 5 Prüfpunkte (Vertikal + Horizontal)
-        Vec3[] targetPoints = new Vec3[]{
-            target.getEyePosition(),           // Kopf
-            endCenter,                         // Mitte
-            target.position(),                 // Füße
-            endCenter.add(sideOffset),         // Linke Kante
-            endCenter.subtract(sideOffset)     // Rechte Kante
-        };
+		// 3. Shared Line of Sight für die SEITEN-Kanten des Reittiers (Magie-Ausnahme)
+		boolean targetIsInvisible = target.hasEffect(net.minecraft.world.effect.MobEffects.INVISIBILITY);
+		if (!targetIsInvisible && target.getVehicle() instanceof LivingEntity mount) {
+			// Rekursion für Manhunt: Prüft explizit nochmal, ob die Seitenkanten des Pferdes herausschauen
+			return hasManhuntLineOfSight(observer, mount);
+		}
 
-        // 5. Raycast mit Short-Circuit (bricht ab, sobald der 1. Strahl trifft)
-        for (Vec3 end : targetPoints) {
-            if (observer.level().clip(new ClipContext(start, end, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, observer)).getType() == HitResult.Type.MISS) {
-                return true;
-            }
-        }
-
-        return false;
-    }
+		return false;
+	}
 }
