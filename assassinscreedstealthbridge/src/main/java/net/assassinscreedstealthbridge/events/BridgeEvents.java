@@ -1,11 +1,16 @@
 package net.assassinscreedstealthbridge.events;
 
 import net.assassinscreedstealthbridge.registry.BridgeTags;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
@@ -28,7 +33,6 @@ public class BridgeEvents {
         ItemStack stack = event.getItemStack();
         EquipmentSlot slot = event.getSlotType();
 
-        // 1. WEAPONS - BACKSTAB BUFF via TAG TIER
         double backstabBonus = 0.0;
         if (stack.is(BridgeTags.STEALTH_WEAPON_T3)) backstabBonus = 5.0D;
         else if (stack.is(BridgeTags.STEALTH_WEAPON_T2)) backstabBonus = 3.0D;
@@ -39,7 +43,6 @@ public class BridgeEvents {
                     new AttributeModifier(getUUIDForSlot(slot, "AC_WeaponBackstab"), "AC Backstab", backstabBonus, AttributeModifier.Operation.ADDITION));
         }
 
-        // 2. ARMOR - CAMO & MUFFLE BUFF via TAG TIER
         double camoBonus = 0.0;
         double muffleBonus = 0.0;
         if (stack.is(BridgeTags.ASSASSIN_ARMOR_T3)) { camoBonus = 0.15D; muffleBonus = 0.20D; }
@@ -62,7 +65,6 @@ public class BridgeEvents {
             ItemStack weapon = player.getMainHandItem();
 
             if (weapon.is(BridgeTags.STEALTH_WEAPON_T3)) {
-                // Check for downward velocity indicating a fall/jump
                 if (player.getDeltaMovement().y < -0.1) {
                     if (player.level() instanceof ServerLevel sl) {
                         sl.sendParticles(ParticleTypes.CRIT,
@@ -74,11 +76,7 @@ public class BridgeEvents {
                     }
 
                     player.level().playSound(null, player.blockPosition(), StealthSounds.BACKSTAB.get(), SoundSource.PLAYERS, 2.0f, 0.8f);
-
-                    // Massive damage boost
                     event.setAmount(event.getAmount() * 10.0f);
-
-                    // Negate fall damage
                     player.fallDistance = 0.0f;
                 }
             }

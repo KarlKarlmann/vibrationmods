@@ -2,4 +2,5 @@ archivesBaseName = 'assassinscreedstealthbridge'
 
 dependencies {
     compileOnly fg.deobf(fileTree(dir: rootProject.file('libs'), include: '*stealth*.jar'))
+    compileOnly fg.deobf(fileTree(dir: rootProject.file('libs'), include: '*assassins_creed*.jar'))
 }

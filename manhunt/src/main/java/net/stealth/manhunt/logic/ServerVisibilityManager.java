@@ -85,40 +85,55 @@ public class ServerVisibilityManager {
      * Präzises Silhouetten-Raycasting exklusiv für das Manhunt-Culling.
      * Prüft Kopf, Mitte, Füße sowie die linke und rechte Kante der Hitbox.
      */
-	public static boolean hasManhuntLineOfSight(ServerPlayer observer, LivingEntity target) {
-		// 1. Core-Abfrage: Deckt Glowing, Reiter-Ausnahme, die 3 Basis-Punkte UND die Mount-Rekursion dafür ab!
-		if (StealthMath.hasLineOfSight(observer, target)) {
-			return true;
-		}
+    public static boolean hasManhuntLineOfSight(ServerPlayer observer, LivingEntity target) {
+        // 1. Standard Vanilla-Sichtprüfung
+        if (StealthMath.hasLineOfSight(observer, target)) {
+            return true;
+        }
 
-		// 2. Core hat 'false' gesagt. Jetzt prüfen wir die zusätzlichen Manhunt-Silhouetten (Seitenkanten)
-		Vec3 start = observer.getEyePosition();
-		Vec3 endCenter = target.getBoundingBox().getCenter();
-		double width = target.getBbWidth();
+        Vec3 start = observer.getEyePosition();
 
-		Vec3 viewDir = endCenter.subtract(start);
-		Vec3 flatDir = new Vec3(viewDir.x, 0, viewDir.z);
-		Vec3 rightVec = (flatDir.lengthSqr() < 1E-4) ? new Vec3(1, 0, 0) : new Vec3(-flatDir.z, 0, flatDir.x).normalize();
-		Vec3 sideOffset = rightVec.scale(width * 0.45);
+        // 2. GENERISCHER KOPF-TEST (Essenziell für alle sitzenden Entities):
+        // Prüft direkt die Augenhöhe. Wenn der Kopf frei steht, ist das Entity sichtbar!
+        Vec3 eyePos = target.getEyePosition();
+        if (observer.level().clip(new ClipContext(start, eyePos, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, observer)).getType() == HitResult.Type.MISS) {
+            return true;
+        }
 
-		Vec3[] sidePoints = new Vec3[]{
-			endCenter.add(sideOffset),         // Linke Kante
-			endCenter.subtract(sideOffset)     // Rechte Kante
-		};
+        // 3. Silhouetten-Prüfung der Bounding-Box-Mitte (Kanten)
+        Vec3 endCenter = target.getBoundingBox().getCenter();
+        double width = target.getBbWidth();
 
-		for (Vec3 end : sidePoints) {
-			if (observer.level().clip(new ClipContext(start, end, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, observer)).getType() == HitResult.Type.MISS) {
-				return true;
-			}
-		}
+        Vec3 viewDir = endCenter.subtract(start);
+        Vec3 flatDir = new Vec3(viewDir.x, 0, viewDir.z);
+        Vec3 rightVec = (flatDir.lengthSqr() < 1E-4) ? new Vec3(1, 0, 0) : new Vec3(-flatDir.z, 0, flatDir.x).normalize();
+        Vec3 sideOffset = rightVec.scale(width * 0.45);
 
-		// 3. Shared Line of Sight für die SEITEN-Kanten des Reittiers (Magie-Ausnahme)
-		boolean targetIsInvisible = target.hasEffect(net.minecraft.world.effect.MobEffects.INVISIBILITY);
-		if (!targetIsInvisible && target.getVehicle() instanceof LivingEntity mount) {
-			// Rekursion für Manhunt: Prüft explizit nochmal, ob die Seitenkanten des Pferdes herausschauen
-			return hasManhuntLineOfSight(observer, mount);
-		}
+        Vec3[] sidePoints = new Vec3[]{
+            endCenter.add(sideOffset),
+            endCenter.subtract(sideOffset)
+        };
 
-		return false;
-	}
+        for (Vec3 end : sidePoints) {
+            if (observer.level().clip(new ClipContext(start, end, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, observer)).getType() == HitResult.Type.MISS) {
+                return true;
+            }
+        }
+
+        // 4. GENERISCHE VEHIKEL-REKURSION (Für JEGLICHE Reittiere / Sitz-Objekte):
+        boolean targetIsInvisible = target.hasEffect(net.minecraft.world.effect.MobEffects.INVISIBILITY);
+        if (!targetIsInvisible && target.isPassenger()) {
+            Entity vehicle = target.getVehicle();
+            if (vehicle instanceof LivingEntity mount) {
+                return hasManhuntLineOfSight(observer, mount);
+            }
+            // Für nicht-lebende Vehikel (Boote, Loren, Sitze): Ist das Vehikel selbst im Sichtfeld?
+            if (vehicle != null) {
+                Vec3 vehicleCenter = vehicle.getBoundingBox().getCenter();
+                return observer.level().clip(new ClipContext(start, vehicleCenter, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, observer)).getType() == HitResult.Type.MISS;
+            }
+        }
+
+        return false;
+    }
 }

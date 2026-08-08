@@ -21,6 +21,6 @@ side="BOTH"
 [[dependencies.manhunt]]
 modId="stealth"
 mandatory=true
-versionRange="[1.0.103,)"
+versionRange="[1.0.105,)"
 ordering="AFTER"
 side="BOTH"
