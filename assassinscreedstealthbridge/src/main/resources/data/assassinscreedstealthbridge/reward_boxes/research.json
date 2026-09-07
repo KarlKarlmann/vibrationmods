@@ -1,0 +1,47 @@
+{
+"box_id": "reward_box:research",
+"texture": "reward_box:textures/entity/chest/reward_chest.png",
+"lock_duration_seconds": 300,
+"break_drop_item": "minecraft:lapis_lazuli",
+"break_drop_count": 4,
+"guaranteed_items": [
+{
+"item": "minecraft:experience_bottle",
+"min_tier": 1,
+"count": 3,
+"count_per_tier": 4
+},
+{
+"item": "minecraft:book",
+"min_tier": 2,
+"count": 1,
+"count_per_tier": 2
+},
+{
+"item": "assassins_creed:kodeks",
+"min_tier": 4,
+"count": 1,
+"count_per_tier": 1
+}
+],
+"vanilla_loot_pools": [
+{
+"min_tier": 1,
+"tables": [
+"minecraft:chests/stronghold_library",
+"minecraft:chests/igloo_chest"
+]
+},
+{
+"min_tier": 4,
+"tables": [
+"minecraft:chests/ancient_city",
+"minecraft:chests/woodland_mansion"
+]
+}
+],
+"crazy_mod_items": {
+"min_tier": 5,
+"enchant_scaling": true
+}
+}

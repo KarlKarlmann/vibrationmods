@@ -1,0 +1,47 @@
+{
+"box_id": "reward_box:enforcers",
+"texture": "reward_box:textures/entity/chest/reward_chest.png",
+"lock_duration_seconds": 300,
+"break_drop_item": "minecraft:coal",
+"break_drop_count": 3,
+"guaranteed_items": [
+{
+"item": "assassins_creed:cast_iron",
+"min_tier": 1,
+"count": 1,
+"count_per_tier": 2
+},
+{
+"item": "assassins_creed:wrought_iron",
+"min_tier": 3,
+"count": 1,
+"count_per_tier": 2
+},
+{
+"item": "minecraft:diamond",
+"min_tier": 4,
+"count": 1,
+"count_per_tier": 1
+}
+],
+"vanilla_loot_pools": [
+{
+"min_tier": 1,
+"tables": [
+"minecraft:chests/ruined_portal",
+"minecraft:chests/simple_dungeon"
+]
+},
+{
+"min_tier": 4,
+"tables": [
+"minecraft:chests/bastion_treasure",
+"minecraft:chests/nether_bridge"
+]
+}
+],
+"crazy_mod_items": {
+"min_tier": 5,
+"enchant_scaling": true
+}
+}

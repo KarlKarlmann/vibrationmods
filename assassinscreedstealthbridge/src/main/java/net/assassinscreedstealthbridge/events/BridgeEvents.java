@@ -15,10 +15,12 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.ItemAttributeModifierEvent;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.stealth.registry.StealthAttributes;
 import net.stealth.registry.StealthSounds;
+import net.assassinscreedstealthbridge.commands.SyndicateCommand;
 
 import java.util.UUID;
 
@@ -81,5 +83,11 @@ public class BridgeEvents {
                 }
             }
         }
+    }
+
+    @SubscribeEvent
+    public void onRegisterCommands(RegisterCommandsEvent event) {
+        // Registriert unseren /syndicate ambush Befehl!
+        SyndicateCommand.register(event.getDispatcher());
     }
 }

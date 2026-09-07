@@ -20,15 +20,8 @@ import java.util.UUID;
 
 public class SyndicateManager extends SavedData {
 
-    // Speichert das permanente Fahndungslevel der Spieler (UUID -> Punkte)
     private final Map<UUID, Integer> playerThreatLevels = new HashMap<>();
-    
-    // Speichert das Ambush-Level (Welche Welle kommt als nächstes?)
-    private final Map<UUID, Integer> playerAmbushLevels = new HashMap<>();
-    
-    // Das tägliche "Hauptbuch" (Welcher Spion-Mob hat welchen Spieler gesehen?)
-    private final Map<UUID, Sighting> activeSightings = new HashMap<>();
-    
+    private final Map<UUID, Map<UUID, Sighting>> activeSightings = new HashMap<>();
     public long lastReckoningDay = -1;
 
     public static class Sighting {
@@ -49,7 +42,6 @@ public class SyndicateManager extends SavedData {
         );
     }
 
-    // --- Threat Level ---
     public int getThreatLevel(Player player) {
         return playerThreatLevels.getOrDefault(player.getUUID(), 0);
     }
@@ -58,70 +50,65 @@ public class SyndicateManager extends SavedData {
         playerThreatLevels.put(player.getUUID(), 0);
         setDirty();
     }
-
-    // --- Ambush Level ---
-    public int getAmbushLevel(Player player) {
-        return playerAmbushLevels.getOrDefault(player.getUUID(), 1);
+    
+    public void clearPendingPointsForPlayer(Player player) {
+        UUID pUuid = player.getUUID();
+        boolean changed = false;
+        for (Map<UUID, Sighting> mobSightings : activeSightings.values()) {
+            if (mobSightings.remove(pUuid) != null) {
+                changed = true;
+            }
+        }
+        if (changed) setDirty();
     }
 
-    public void incrementAmbushLevel(Player player) {
-        int current = getAmbushLevel(player);
-        playerAmbushLevels.put(player.getUUID(), current + 1);
-        setDirty();
-    }
-
-    // --- Sightings ---
     public int getPendingPoints(Player player) {
         int points = 0;
         UUID pUuid = player.getUUID();
-        for (Sighting sighting : activeSightings.values()) {
-            if (sighting.playerUuid.equals(pUuid)) {
+        for (Map<UUID, Sighting> mobSightings : activeSightings.values()) {
+            Sighting sighting = mobSightings.get(pUuid);
+            if (sighting != null) {
                 points += sighting.points;
             }
         }
         return points;
     }
 
-    public Sighting getSighting(LivingEntity informant) {
-        return activeSightings.get(informant.getUUID());
+    public Sighting getSightingForPlayer(LivingEntity informant, Player player) {
+        Map<UUID, Sighting> mobSightings = activeSightings.get(informant.getUUID());
+        return mobSightings != null ? mobSightings.get(player.getUUID()) : null;
     }
 
     public void addSighting(LivingEntity informant, Player player, int points) {
-        if (!activeSightings.containsKey(informant.getUUID())) {
-            activeSightings.put(informant.getUUID(), new Sighting(player.getUUID(), points));
-            setDirty();
-            //AssassinsCreedStealthBridge.LOGGER.info("[Syndicate Debug] SPION ALARM! " + informant.getName().getString() + " hat " + player.getName().getString() + " gesehen! (+" + points + " Pending Points)");
-        }
+        activeSightings.computeIfAbsent(informant.getUUID(), k -> new HashMap<>())
+                       .putIfAbsent(player.getUUID(), new Sighting(player.getUUID(), points));
+        setDirty();
     }
 
     public void onMobDeath(LivingEntity mob) {
         if (activeSightings.remove(mob.getUUID()) != null) {
             setDirty();
-            //AssassinsCreedStealthBridge.LOGGER.info("[Syndicate Debug] Zeuge eliminiert! Eintrag für Mob " + mob.getUUID() + " wurde aus dem Hauptbuch gelöscht.");
         }
     }
 
     public void executeDailyReckoning(ServerLevel level) {
-        //AssassinsCreedStealthBridge.LOGGER.info("[Syndicate Debug] Führe Daily Reckoning (Tagesabrechnung) durch...");
-        
         Set<UUID> playersSeenToday = new HashSet<>();
         int threshold = SyndicateConfig.THREAT_THRESHOLD.get();
 
-        // 1. Alle Einträge aus dem Hauptbuch verarbeiten und addieren
-        for (Sighting sighting : activeSightings.values()) {
-            UUID pUuid = sighting.playerUuid;
-            int currentThreat = playerThreatLevels.getOrDefault(pUuid, 0);
-            playerThreatLevels.put(pUuid, currentThreat + sighting.points);
-            playersSeenToday.add(pUuid);
+        for (Map<UUID, Sighting> mobSightings : activeSightings.values()) {
+            for (Sighting sighting : mobSightings.values()) {
+                UUID pUuid = sighting.playerUuid;
+                int currentThreat = playerThreatLevels.getOrDefault(pUuid, 0);
+                playerThreatLevels.put(pUuid, currentThreat + sighting.points);
+                playersSeenToday.add(pUuid);
+            }
         }
 
-        // 2. Chat-Nachrichten und Decay an alle Spieler verschicken
         for (UUID pUuid : playerThreatLevels.keySet()) {
             int finalThreat = playerThreatLevels.get(pUuid);
             ServerPlayer onlinePlayer = level.getServer().getPlayerList().getPlayer(pUuid);
             
             if (!playersSeenToday.contains(pUuid)) {
-                // Decay (Punkte verfallen, wenn man nicht gesehen wurde)
                 if (finalThreat > 0) {
                     finalThreat = Math.max(0, finalThreat - 10);
                     playerThreatLevels.put(pUuid, finalThreat);
@@ -140,13 +127,10 @@ public class SyndicateManager extends SavedData {
             }
         }
 
-        // 3. Hauptbuch leeren
         activeSightings.clear();
         setDirty();
-        //AssassinsCreedStealthBridge.LOGGER.info("[Syndicate Debug] Daily Reckoning abgeschlossen. Hauptbuch wurde geleert.");
     }
 
-    // --- Speichern & Laden (NBT) ---
     public static SyndicateManager load(CompoundTag tag) {
         SyndicateManager manager = new SyndicateManager();
         manager.lastReckoningDay = tag.getLong("LastReckoningDay");
@@ -156,18 +140,15 @@ public class SyndicateManager extends SavedData {
             manager.playerThreatLevels.put(UUID.fromString(key), levelsTag.getInt(key));
         }
 
-        CompoundTag ambushTag = tag.getCompound("AmbushLevels");
-        for (String key : ambushTag.getAllKeys()) {
-            manager.playerAmbushLevels.put(UUID.fromString(key), ambushTag.getInt(key));
-        }
-
         ListTag sightingsList = tag.getList("Sightings", Tag.TAG_COMPOUND);
         for (int i = 0; i < sightingsList.size(); i++) {
             CompoundTag sTag = sightingsList.getCompound(i);
             UUID mobUuid = sTag.getUUID("MobUUID");
             UUID playerUuid = sTag.getUUID("PlayerUUID");
             int points = sTag.getInt("Points");
-            manager.activeSightings.put(mobUuid, new Sighting(playerUuid, points));
+            
+            manager.activeSightings.computeIfAbsent(mobUuid, k -> new HashMap<>())
+                                   .put(playerUuid, new Sighting(playerUuid, points));
         }
         return manager;
     }
@@ -182,19 +163,16 @@ public class SyndicateManager extends SavedData {
         }
         tag.put("ThreatLevels", levelsTag);
 
-        CompoundTag ambushTag = new CompoundTag();
-        for (Map.Entry<UUID, Integer> entry : playerAmbushLevels.entrySet()) {
-            ambushTag.putInt(entry.getKey().toString(), entry.getValue());
-        }
-        tag.put("AmbushLevels", ambushTag);
-
         ListTag sightingsList = new ListTag();
-        for (Map.Entry<UUID, Sighting> entry : activeSightings.entrySet()) {
-            CompoundTag sTag = new CompoundTag();
-            sTag.putUUID("MobUUID", entry.getKey());
-            sTag.putUUID("PlayerUUID", entry.getValue().playerUuid);
-            sTag.putInt("Points", entry.getValue().points);
-            sightingsList.add(sTag);
+        for (Map.Entry<UUID, Map<UUID, Sighting>> mobEntry : activeSightings.entrySet()) {
+            UUID mobUuid = mobEntry.getKey();
+            for (Sighting sighting : mobEntry.getValue().values()) {
+                CompoundTag sTag = new CompoundTag();
+                sTag.putUUID("MobUUID", mobUuid);
+                sTag.putUUID("PlayerUUID", sighting.playerUuid);
+                sTag.putInt("Points", sighting.points);
+                sightingsList.add(sTag);
+            }
         }
         tag.put("Sightings", sightingsList);
 

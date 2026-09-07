@@ -1,0 +1,47 @@
+{
+"box_id": "reward_box:shadow_cell",
+"texture": "reward_box:textures/entity/chest/reward_chest.png",
+"lock_duration_seconds": 300,
+"break_drop_item": "minecraft:redstone",
+"break_drop_count": 5,
+"guaranteed_items": [
+{
+"item": "minecraft:ender_pearl",
+"min_tier": 1,
+"count": 1,
+"count_per_tier": 1
+},
+{
+"item": "minecraft:phantom_membrane",
+"min_tier": 3,
+"count": 1,
+"count_per_tier": 2
+},
+{
+"item": "assassins_creed:medallion",
+"min_tier": 4,
+"count": 1,
+"count_per_tier": 1
+}
+],
+"vanilla_loot_pools": [
+{
+"min_tier": 1,
+"tables": [
+"minecraft:chests/simple_dungeon",
+"minecraft:chests/abandoned_mineshaft"
+]
+},
+{
+"min_tier": 4,
+"tables": [
+"minecraft:chests/ancient_city",
+"minecraft:chests/woodland_mansion"
+]
+}
+],
+"crazy_mod_items": {
+"min_tier": 5,
+"enchant_scaling": true
+}
+}

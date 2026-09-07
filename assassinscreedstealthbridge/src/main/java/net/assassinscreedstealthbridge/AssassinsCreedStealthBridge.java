@@ -6,6 +6,8 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.assassinscreedstealthbridge.events.BridgeEvents;
+import net.assassinscreedstealthbridge.registry.ModEntities;
+import net.assassinscreedstealthbridge.network.SyndicateNetwork;
 import org.slf4j.Logger;
 import net.assassinscreedstealthbridge.config.SyndicateConfig;
 import net.minecraftforge.fml.config.ModConfig;
@@ -17,14 +19,23 @@ public class AssassinsCreedStealthBridge {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public AssassinsCreedStealthBridge() {
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
+        var modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+        modEventBus.addListener(this::setup);
+
+        // Registriert unsere neuen Entitäten (inkl. Wandering Wanderer)
+        ModEntities.ENTITIES.register(modEventBus);
 
         // Registriert unsere extrem mächtigen Bridge-Events!
         MinecraftForge.EVENT_BUS.register(new BridgeEvents());
-		ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, SyndicateConfig.SERVER_SPEC);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, SyndicateConfig.SERVER_SPEC);
     }
 
     private void setup(final FMLCommonSetupEvent event) {
+        // Netzwerkpakete threadsicher registrieren, damit die PoE-GUI funktioniert!
+        event.enqueueWork(() -> {
+            SyndicateNetwork.register();
+        });
+        
         LOGGER.info("[AC-Stealth-Bridge] Loaded! The Brotherhood is now fully integrated with the Stealth System.");
     }
 }

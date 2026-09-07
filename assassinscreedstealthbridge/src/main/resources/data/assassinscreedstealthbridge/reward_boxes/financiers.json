@@ -1,0 +1,47 @@
+{
+  "box_id": "reward_box:financiers",
+  "texture": "reward_box:textures/entity/chest/reward_chest.png",
+  "lock_duration_seconds": 300,
+  "break_drop_item": "minecraft:gold_nugget",
+  "break_drop_count": 6,
+  "guaranteed_items": [
+    {
+      "item": "minecraft:emerald",
+      "min_tier": 1,
+      "count": 3,
+      "count_per_tier": 4
+    },
+    {
+      "item": "minecraft:emerald_block",
+      "min_tier": 1,
+      "count": 1,
+      "count_per_tier": 1
+    },
+    {
+      "item": "minecraft:gold_ingot",
+      "min_tier": 3,
+      "count": 2,
+      "count_per_tier": 4
+    }
+  ],
+  "vanilla_loot_pools": [
+    {
+      "min_tier": 1,
+      "tables": [
+        "minecraft:chests/desert_pyramid",
+        "minecraft:chests/shipwreck_treasure"
+      ]
+    },
+    {
+      "min_tier": 4,
+      "tables": [
+        "minecraft:chests/buried_treasure",
+        "minecraft:chests/bastion_treasure"
+      ]
+    }
+  ],
+  "crazy_mod_items": {
+    "min_tier": 5,
+    "enchant_scaling": true
+  }
+}

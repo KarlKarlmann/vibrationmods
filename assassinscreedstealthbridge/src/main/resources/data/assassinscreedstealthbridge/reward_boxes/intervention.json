@@ -1,0 +1,47 @@
+{
+"box_id": "reward_box:intervention",
+"texture": "reward_box:textures/entity/chest/reward_chest.png",
+"lock_duration_seconds": 300,
+"break_drop_item": "minecraft:arrow",
+"break_drop_count": 5,
+"guaranteed_items": [
+{
+"item": "minecraft:arrow",
+"min_tier": 1,
+"count": 8,
+"count_per_tier": 8
+},
+{
+"item": "assassins_creed:thknife",
+"min_tier": 2,
+"count": 2,
+"count_per_tier": 3
+},
+{
+"item": "minecraft:crossbow",
+"min_tier": 4,
+"count": 1,
+"count_per_tier": 0
+}
+],
+"vanilla_loot_pools": [
+{
+"min_tier": 1,
+"tables": [
+"minecraft:chests/pillager_outpost",
+"minecraft:chests/village/village_weaponsmith"
+]
+},
+{
+"min_tier": 4,
+"tables": [
+"minecraft:chests/bastion_treasure",
+"minecraft:chests/end_city_treasure"
+]
+}
+],
+"crazy_mod_items": {
+"min_tier": 5,
+"enchant_scaling": true
+}
+}

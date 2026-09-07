@@ -1,0 +1,47 @@
+{
+"box_id": "reward_box:transportation",
+"texture": "reward_box:textures/entity/chest/reward_chest.png",
+"lock_duration_seconds": 300,
+"break_drop_item": "minecraft:raw_iron",
+"break_drop_count": 2,
+"guaranteed_items": [
+{
+"item": "minecraft:iron_ingot",
+"min_tier": 1,
+"count": 2,
+"count_per_tier": 3
+},
+{
+"item": "assassins_creed:steel",
+"min_tier": 3,
+"count": 1,
+"count_per_tier": 2
+},
+{
+"item": "minecraft:minecart",
+"min_tier": 5,
+"count": 1,
+"count_per_tier": 0
+}
+],
+"vanilla_loot_pools": [
+{
+"min_tier": 1,
+"tables": [
+"minecraft:chests/abandoned_mineshaft",
+"minecraft:chests/village/village_toolsmith"
+]
+},
+{
+"min_tier": 3,
+"tables": [
+"minecraft:chests/shipwreck_supply",
+"minecraft:chests/bastion_bridge"
+]
+}
+],
+"crazy_mod_items": {
+"min_tier": 5,
+"enchant_scaling": true
+}
+}

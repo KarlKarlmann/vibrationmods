@@ -1,0 +1,47 @@
+{
+"box_id": "reward_box:zealots",
+"texture": "reward_box:textures/entity/chest/reward_chest.png",
+"lock_duration_seconds": 300,
+"break_drop_item": "minecraft:blaze_powder",
+"break_drop_count": 2,
+"guaranteed_items": [
+{
+"item": "minecraft:golden_apple",
+"min_tier": 1,
+"count": 1,
+"count_per_tier": 1
+},
+{
+"item": "minecraft:enchanted_golden_apple",
+"min_tier": 5,
+"count": 1,
+"count_per_tier": 0
+},
+{
+"item": "assassins_creed:apple_of_eden",
+"min_tier": 5,
+"count": 1,
+"count_per_tier": 0
+}
+],
+"vanilla_loot_pools": [
+{
+"min_tier": 1,
+"tables": [
+"minecraft:chests/nether_bridge",
+"minecraft:chests/desert_pyramid"
+]
+},
+{
+"min_tier": 4,
+"tables": [
+"minecraft:chests/ancient_city",
+"minecraft:chests/woodland_mansion"
+]
+}
+],
+"crazy_mod_items": {
+"min_tier": 5,
+"enchant_scaling": true
+}
+}

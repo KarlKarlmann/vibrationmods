@@ -4,9 +4,13 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 
 public class BridgeTags {
-    // Rüstungen (3 Tiers)
+    
+    // --- Blocks ---
+    public static final TagKey<Block> SYNDICATE_BOARD = TagKey.create(Registries.BLOCK, new ResourceLocation("assassinscreedstealthbridge", "syndicate_board"));
+
     public static final TagKey<Item> ASSASSIN_ARMOR_T1 = TagKey.create(Registries.ITEM, new ResourceLocation("assassinscreedstealthbridge", "assassin_armor_t1"));
     public static final TagKey<Item> ASSASSIN_ARMOR_T2 = TagKey.create(Registries.ITEM, new ResourceLocation("assassinscreedstealthbridge", "assassin_armor_t2"));
     public static final TagKey<Item> ASSASSIN_ARMOR_T3 = TagKey.create(Registries.ITEM, new ResourceLocation("assassinscreedstealthbridge", "assassin_armor_t3"));

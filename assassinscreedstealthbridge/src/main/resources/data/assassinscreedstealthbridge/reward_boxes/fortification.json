@@ -1,0 +1,47 @@
+{
+"box_id": "reward_box:fortification",
+"texture": "reward_box:textures/entity/chest/reward_chest.png",
+"lock_duration_seconds": 300,
+"break_drop_item": "minecraft:leather",
+"break_drop_count": 3,
+"guaranteed_items": [
+{
+"item": "minecraft:leather",
+"min_tier": 1,
+"count": 4,
+"count_per_tier": 2
+},
+{
+"item": "minecraft:iron_block",
+"min_tier": 3,
+"count": 1,
+"count_per_tier": 1
+},
+{
+"item": "minecraft:obsidian",
+"min_tier": 4,
+"count": 4,
+"count_per_tier": 2
+}
+],
+"vanilla_loot_pools": [
+{
+"min_tier": 1,
+"tables": [
+"minecraft:chests/village/village_armorer",
+"minecraft:chests/ruined_portal"
+]
+},
+{
+"min_tier": 4,
+"tables": [
+"minecraft:chests/bastion_other",
+"minecraft:chests/end_city_treasure"
+]
+}
+],
+"crazy_mod_items": {
+"min_tier": 5,
+"enchant_scaling": true
+}
+}
