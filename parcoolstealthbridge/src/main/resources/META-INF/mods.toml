@@ -21,7 +21,7 @@ ParCool! & Stealth by Karl Karlmann Bridge-Mod.
 [[dependencies.parcoolstealthbridge]]
 modId="stealth"
 mandatory=true
-versionRange="[1.0.10hotfix,)"
+versionRange="[1.0.107,)"
 ordering="NONE"
 side="BOTH"
 

@@ -1,12 +1,10 @@
 package net.assassinscreedstealthbridge.network;
 
 import net.assassinscreedstealthbridge.AssassinsCreedStealthBridge;
-import net.assassinscreedstealthbridge.client.SyndicateBoardScreen;
 import net.assassinscreedstealthbridge.syndicate.SyndicateBoardManager;
 import net.assassinscreedstealthbridge.syndicate.SyndicateDivision;
 import net.assassinscreedstealthbridge.syndicate.SyndicateEvents;
 import net.assassinscreedstealthbridge.syndicate.SyndicateMember;
-import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -15,6 +13,8 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.NetworkRegistry;
@@ -64,8 +64,9 @@ public class SyndicateNetwork {
 
         public void handle(Supplier<NetworkEvent.Context> ctx) {
             ctx.get().enqueueWork(() -> {
-                SyndicateBoardManager clientBoard = SyndicateBoardManager.load(this.boardData);
-                Minecraft.getInstance().setScreen(new SyndicateBoardScreen(clientBoard));
+                // WICHTIG: DistExecutor sorgt dafür, dass dieser Codeblock
+                // vom Server beim Laden komplett ignoriert wird!
+                DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ClientPacketHandler.handleOpenBoard(this.boardData));
             });
             ctx.get().setPacketHandled(true);
         }
@@ -174,6 +175,20 @@ public class SyndicateNetwork {
             if (!player.getInventory().add(reward)) {
                 player.level().addFreshEntity(new ItemEntity(player.level(), player.getX(), player.getY(), player.getZ(), reward));
             }
+        }
+    }
+
+    /**
+     * Diese statische Hilfsklasse wird nur aufgerufen, wenn wir uns
+     * wirklich auf dem physischen Client (Spieler-PC) befinden.
+     */
+    public static class ClientPacketHandler {
+        public static void handleOpenBoard(CompoundTag boardData) {
+            SyndicateBoardManager clientBoard = SyndicateBoardManager.load(boardData);
+            // Direkte Verweise auf net.minecraft.client.* sind hier erlaubt!
+            net.minecraft.client.Minecraft.getInstance().setScreen(
+                    new net.assassinscreedstealthbridge.client.SyndicateBoardScreen(clientBoard)
+            );
         }
     }
 }
